@@ -25,7 +25,7 @@ function About() {
             <br></br>
             <h2 className="section-title">About Absar Law Company</h2>
             <p className="about__body">
-              Absars Law Company is a premier full-service law firm committed to delivering
+              Absar Law Company is a premier full-service law firm committed to delivering
               practical, solution-oriented legal counsel. With decades of experience across
               diverse practice areas, our attorneys bring deep expertise and an unwavering
               commitment to client success.

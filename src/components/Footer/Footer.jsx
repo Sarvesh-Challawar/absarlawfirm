@@ -1,11 +1,12 @@
+import { useNavigate } from 'react-router-dom'
 import './Footer.css'
 
 const QUICK_LINKS = [
-  { label: 'About Us',         href: '#about' },
-  { label: 'People',           href: '#people' },
-  { label: 'Practice Areas',   href: '#practice-areas' },
-  { label: 'Knowledge Center', href: '#knowledge-center' },
-  { label: 'Offices',          href: '#offices' },
+  { label: 'About Us',         path: '/about' },
+  { label: 'People',           path: '/people' },
+  { label: 'Practice Areas',   path: '/practice-areas' },
+  { label: 'Knowledge Center', path: '/knowledge-center' },
+  { label: 'Offices',          path: '/offices' },
 ]
 
 const PRACTICE_LINKS = [
@@ -24,7 +25,13 @@ const SOCIAL = [
 ]
 
 function Footer() {
+  const navigate = useNavigate()
   const year = new Date().getFullYear()
+
+  function handleNav(path) {
+    navigate(path)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <footer className="footer" id="offices">
@@ -60,8 +67,13 @@ function Footer() {
             <h4 className="footer__col-title">Quick Links</h4>
             <ul className="footer__list">
               {QUICK_LINKS.map(l => (
-                <li key={l.href}>
-                  <a href={l.href} className="footer__link">{l.label}</a>
+                <li key={l.path}>
+                  <button
+                    className="footer__link footer__link--btn"
+                    onClick={() => handleNav(l.path)}
+                  >
+                    {l.label}
+                  </button>
                 </li>
               ))}
             </ul>
@@ -73,7 +85,12 @@ function Footer() {
             <ul className="footer__list">
               {PRACTICE_LINKS.map(p => (
                 <li key={p}>
-                  <a href="#practice-areas" className="footer__link">{p}</a>
+                  <button
+                    className="footer__link footer__link--btn"
+                    onClick={() => handleNav('/practice-areas')}
+                  >
+                    {p}
+                  </button>
                 </li>
               ))}
             </ul>

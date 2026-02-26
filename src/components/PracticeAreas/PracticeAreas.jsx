@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import './PracticeAreas.css'
 
 const AREAS = [
@@ -64,6 +65,9 @@ const AREAS = [
 ]
 
 function PracticeAreas() {
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
   return (
     <section id="practice-areas" className="practice section">
       <div className="container">

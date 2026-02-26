@@ -35,17 +35,17 @@ function Disclaimer() {
             By clicking on <strong>'Agree and Enter'</strong>, the visitor acknowledges that:
           </p>
           <ol className="disclaimer-list">
-            <li>the contents of this website do not amount to advertising or solicitation;</li>
+            <li>The contents of this website do not amount to advertising or solicitation;</li>
             <li>
-              the information provided on the website is meant only for the visitor's understanding
+              The information provided on the website is meant only for the visitor's understanding
               about our activities and who we are, on their own volition;
             </li>
             <li>
-              the contents of this website do not constitute, and shall not be construed as,
+              The contents of this website do not constitute, and shall not be construed as,
               legal advice or a substitute for legal advice;
             </li>
             <li>
-              the use of this website is completely at the user's own volition and shall not
+              The use of this website is completely at the user's own volition and shall not
               create or amount to an attorney-client relationship;
             </li>
             <li>
@@ -58,7 +58,7 @@ function Disclaimer() {
               express or implied;
             </li>
             <li>
-              the contents of this website are the property of Absar Law Company and the visitor
+              The contents of this website are the property of Absar Law Company and the visitor
               is not authorised to use any part thereof without the express prior written consent
               of Absar Law Company.
             </li>

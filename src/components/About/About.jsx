@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './About.css'
 
 const STATS = [
@@ -8,6 +10,11 @@ const STATS = [
 ]
 
 function About() {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [])
   return (
     <section id="about" className="about section">
       <div className="container">
@@ -28,9 +35,12 @@ function About() {
               established corporations and government bodies — providing representation
               characterised by integrity, diligence, and professionalism.
             </p>
-            <a href="#practice-areas" className="about__cta">
+            <button
+              className="about__cta"
+              onClick={() => navigate('/practice-areas')}
+            >
               Explore Our Practice Areas →
-            </a>
+            </button>
           </div>
 
           {/* Stats */}

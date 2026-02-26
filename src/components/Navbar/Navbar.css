@@ -25,23 +25,28 @@
 .navbar__logo {
   display: flex;
   flex-direction: column;
-  line-height: 1.15;
-  text-decoration: none;
+  line-height: 1.1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
 }
 
 .navbar__logo-main {
   font-family: var(--font-primary);
-  font-size: 1.55rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: var(--color-gold);
   letter-spacing: 0.12em;
+  line-height: 1.1;
 }
 
 .navbar__logo-sub {
   font-family: var(--font-sans);
-  font-size: 0.55rem;
-  color: rgba(255, 255, 255, 0.65);
-  letter-spacing: 0.25em;
+  font-size: 0.52rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.26em;
   text-transform: uppercase;
   font-weight: 400;
 }
@@ -88,6 +93,48 @@
 
 .navbar__link:hover::after {
   transform: scaleX(1);
+}
+
+/* Button reset — makes <button> look identical to the link style */
+.navbar__link--btn {
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.navbar__link--btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 1rem;
+  right: 1rem;
+  height: 2px;
+  background: var(--color-gold);
+  transform: scaleX(0);
+  transition: transform 0.25s ease;
+}
+
+.navbar__link--btn:hover {
+  color: var(--color-gold-light);
+}
+
+.navbar__link--btn:hover::after,
+.navbar__link--active::after {
+  transform: scaleX(1);
+}
+
+/* Active page highlight */
+.navbar__link--active {
+  color: var(--color-gold-light) !important;
 }
 
 /* ─── Hamburger ─────────────────────────────────────────────── */

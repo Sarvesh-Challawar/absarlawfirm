@@ -1,0 +1,56 @@
+[
+  {
+    "id": "1",
+    "category": "Corporate Law",
+    "title": "Key Amendments to the Companies Act: What Boards Need to Know",
+    "date": "February 2026",
+    "excerpt": "Recent legislative changes have introduced significant compliance obligations for listed and unlisted companies. We break down what directors and CFOs must act on immediately.",
+    "body": "The Ministry of Corporate Affairs has notified several amendments to the Companies Act, 2013 that take effect in the financial year 2025–26. Key changes include stricter related-party transaction disclosures, revised thresholds for audit committee oversight, and new timelines for filing financial statements.\n\nBoards are advised to review their existing compliance calendars, update delegation-of-authority matrices, and brief independent directors on enhanced liability provisions. Companies with a turnover exceeding ₹500 crore must additionally appoint an internal ombudsman under the amended framework.\n\nDirectors should note that the amendments also introduce personal liability provisions for repeated non-compliance, making it essential for boards to institute robust internal monitoring mechanisms. Legal counsel should be engaged to review board resolutions passed in the last two financial years against the new standards.",
+    "author": "Absar Law Editorial Team"
+  },
+  {
+    "id": "2",
+    "category": "Intellectual Property",
+    "title": "Protecting Your Brand in the Digital Age: A Trademark Primer",
+    "date": "January 2026",
+    "excerpt": "With the rise of e-commerce and social media, brand protection demands a proactive multi-jurisdictional strategy. This guide outlines the essential steps for Indian businesses.",
+    "body": "Brand owners operating in India's digital economy face a dual challenge: securing registrations under the Trade Marks Act, 1999 while simultaneously monitoring online platforms for infringement. A robust strategy begins with a comprehensive clearance search across Classes 35 and 42 for digital services, followed by filing in priority jurisdictions under the Madrid Protocol.\n\nBusinesses should also register their brand names as domain names, set up marketplace brand registries on Amazon and Flipkart, and establish a watch service for confusingly similar marks. In the event of infringement, Indian courts have demonstrated willingness to grant ex parte ad interim injunctions in clear-cut cases of passing off.\n\nSocial media handles must be secured across all major platforms as soon as a brand is conceptualised, even before commercial launch. The cost of defensive registration is invariably lower than the cost of enforcement after an infringer has established a foothold.",
+    "author": "Absar Law Editorial Team"
+  },
+  {
+    "id": "3",
+    "category": "Employment Law",
+    "title": "The Four Labour Codes: Compliance Roadmap for Employers",
+    "date": "January 2026",
+    "excerpt": "India's consolidation of 29 central labour laws into four codes reshapes obligations around wages, social security, industrial relations, and occupational safety.",
+    "body": "The four Labour Codes — on Wages, Industrial Relations, Social Security, and Occupational Safety, Health and Working Conditions — are expected to be operationalised in a phased manner across states. Employers should audit their existing HR policies against the new definitions of 'worker' and 'employee', recalculate gratuity and PF contribution bases under the revised wage definition, and update standing orders.\n\nThe Industrial Relations Code introduces a higher threshold of 300 workers for retrenchment approvals, which significantly affects mid-sized manufacturers. HR and legal teams should work together to draft compliant offer letters, separation agreements, and grievance redressal mechanisms well ahead of state-level notifications.\n\nOf particular importance is the Social Security Code's expansion of ESIC and EPFO coverage to gig workers and platform-based employees — a category that many technology companies have historically treated as independent contractors. Businesses operating in this space must reassess their engagement models urgently.",
+    "author": "Absar Law Editorial Team"
+  },
+  {
+    "id": "4",
+    "category": "Real Estate",
+    "title": "RERA After Five Years: Lessons for Developers and Buyers",
+    "date": "December 2025",
+    "excerpt": "A review of landmark RERA rulings and their practical implications for project timelines, refund obligations, and homebuyer remedies in 2026.",
+    "body": "Five years since the Real Estate (Regulation and Development) Act came into full force, state RERA authorities have collectively adjudicated over 1.2 lakh complaints. The recurring themes: delayed possession, non-disclosure of encumbrances, and disputes over carpet area calculations.\n\nDevelopers must ensure that project registration details — including completion timelines, contractor details, and financial disclosures — are updated on the RERA portal on a quarterly basis. Homebuyers, on the other hand, are advised to verify project registration status and check for litigation history before executing agreements for sale.\n\nRecent rulings have affirmed homebuyers' right to a full refund with interest at SBI MCLR + 2% in cases of inordinate delay. Developers should factor this potential liability into their project financing and ensure that escrow accounts are maintained and audited as required under the Act.",
+    "author": "Absar Law Editorial Team"
+  },
+  {
+    "id": "5",
+    "category": "Technology & TMT",
+    "title": "India's Digital Personal Data Protection Act: Compliance Checklist",
+    "date": "December 2025",
+    "excerpt": "With the DPDP Act now in force, businesses processing personal data of Indian citizens must implement consent frameworks, data localisation controls, and grievance mechanisms.",
+    "body": "The Digital Personal Data Protection Act, 2023 places obligations on 'Data Fiduciaries' — any entity that determines the purpose and means of processing personal data. Compliance requires: publishing a clear, plain-language privacy notice; obtaining free, specific, and informed consent before processing; appointing a Data Protection Officer for significant data fiduciaries; establishing a mechanism for data principals to withdraw consent and raise grievances; and ensuring cross-border data transfers only to countries notified by the Central Government.\n\nNon-compliance attracts penalties of up to ₹250 crore per instance. Businesses should conduct a data audit, map processing activities, and implement technical safeguards — including encryption and access controls — as immediate priorities.\n\nOf particular concern for startups and SMEs is the requirement to respond to data principal requests within a defined window. Building this capability into existing CRM and customer support infrastructure will require early planning and, in many cases, third-party tooling.",
+    "author": "Absar Law Editorial Team"
+  },
+  {
+    "id": "6",
+    "category": "Banking & Finance",
+    "title": "RBI Regulatory Updates: What Lenders and Borrowers Should Know",
+    "date": "November 2025",
+    "excerpt": "A summary of the Reserve Bank of India's latest circulars on stressed asset resolution, co-lending models, and digital lending norms affecting NBFCs and banks.",
+    "body": "The Reserve Bank of India's recent master directions on digital lending require all regulated entities to disburse loan amounts directly to borrowers' bank accounts, prohibiting pass-through of funds via lending service providers. The updated co-lending framework now permits a broader set of NBFC categories to partner with scheduled commercial banks, subject to board-approved policies on credit appraisal and recovery.\n\nOn the stressed asset front, the RBI's revised prudential framework mandates timely recognition of default and prescribes specific provisioning norms for accounts referred to the NCLT under the IBC. Lenders should review their loan management systems for compliance with the default recognition timelines and update their resolution plans accordingly.\n\nBorrowers in the MSME segment should be aware of the new grievance redressal mechanism mandated for all regulated lenders, which provides an escalation path to the RBI Ombudsman for unresolved complaints — a significant consumer protection development.",
+    "author": "Absar Law Editorial Team"
+  }
+]

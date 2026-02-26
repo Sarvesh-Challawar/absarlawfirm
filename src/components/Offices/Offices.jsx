@@ -3,36 +3,12 @@ import './Offices.css'
 
 const OFFICES = [
   {
-    city: 'New Delhi',
-    type: 'Head Office',
-    address: ['123 Legal Avenue, Suite 400', 'Connaught Place', 'New Delhi – 110 001'],
-    phone: '+91 11 4567 8900',
-    email: 'delhi@absarlaw.com',
-    hours: 'Mon – Fri: 9:00 am – 6:00 pm',
-  },
-  {
-    city: 'Mumbai',
-    type: 'Regional Office',
-    address: ['Level 12, Peninsula Business Park', 'Lower Parel', 'Mumbai – 400 013'],
-    phone: '+91 22 6789 0123',
-    email: 'mumbai@absarlaw.com',
-    hours: 'Mon – Fri: 9:00 am – 6:00 pm',
-  },
-  {
-    city: 'Bangalore',
-    type: 'Regional Office',
-    address: ['Unit 8, RMZ Infinity', 'Old Madras Road', 'Bangalore – 560 016'],
-    phone: '+91 80 4321 9876',
-    email: 'bangalore@absarlaw.com',
-    hours: 'Mon – Fri: 9:00 am – 6:00 pm',
-  },
-  {
     city: 'Hyderabad',
-    type: 'Branch Office',
-    address: ['Plot 42, Jubilee Hills', 'Road No. 36', 'Hyderabad – 500 033'],
-    phone: '+91 40 2345 6789',
-    email: 'hyderabad@absarlaw.com',
-    hours: 'Mon – Fri: 9:30 am – 5:30 pm',
+    type: 'Head Office',
+    address: ['Shah-Ali-Banda', 'Lal-Darwaza', 'Hyderabad - 500 033'],
+    phone: '+91 12345 67890',
+    email: 'absarlarfirm.hyderabad@gmail.com',
+    hours: 'Mon - Fri: 9:30 am - 5:30 pm',
   },
 ]
 
@@ -44,7 +20,7 @@ function Offices() {
   return (
     <section id="offices" className="offices section">
       <div className="container">
-        <p className="offices__eyebrow">Where We Are</p>
+        <br></br>
         <h2 className="section-title">Our Offices</h2>
         <p className="section-subtitle">
           With offices across India's major commercial centres, Absar Law Company is

@@ -23,11 +23,15 @@ export function useArticles() {
     const newArticle = {
       ...article,
       id: Date.now().toString(),
-      date: new Date().toLocaleDateString('en-IN', {
-        month: 'long',
-        year: 'numeric',
-      }),
+      date: article.customDate && article.customDate.trim()
+        ? article.customDate.trim()
+        : new Date().toLocaleDateString('en-IN', {
+            month: 'long',
+            year: 'numeric',
+          }),
     }
+    // don't persist the helper field
+    delete newArticle.customDate
     setArticles(prev => [newArticle, ...prev])
   }
 

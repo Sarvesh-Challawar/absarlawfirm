@@ -140,6 +140,7 @@
   letter-spacing: 0.04em;
   align-self: flex-start;
   margin-top: auto;
+  text-decoration: none;
   transition: color 0.2s ease, letter-spacing 0.2s ease;
 }
 
@@ -388,6 +389,43 @@
   display: flex;
   flex-direction: column;
   gap: 1.1rem;
+}
+
+/* article type toggle */
+.knowledge__type-toggle {
+  display: flex;
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.knowledge__type-btn {
+  flex: 1;
+  background: var(--color-offwhite);
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  letter-spacing: 0.03em;
+}
+
+.knowledge__type-btn + .knowledge__type-btn {
+  border-left: 1px solid var(--color-border);
+}
+
+.knowledge__type-btn--active {
+  background: var(--color-navy);
+  color: var(--color-white);
+}
+
+.knowledge__type-btn:not(.knowledge__type-btn--active):hover {
+  background: var(--color-border);
+  color: var(--color-navy);
 }
 
 .knowledge__form-section-title {

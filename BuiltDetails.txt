@@ -1,0 +1,39 @@
+## What was built
+
+### 🔒 Disclaimer Popup (Disclaimer.jsx)
+- Appears on first page load using localStorage — once agreed, it never shows again
+- Dark overlay with a centered modal, navy header with gold firm name
+- Numbered disclaimer clauses (same pattern as Kochhar & Co.)
+- "Agree and Enter" button with hover effect
+
+### 🧭 Navbar (Navbar.jsx)
+- Fixed to top, dark navy with gold accent underlines on hover
+- Links: About Us · People · Practice Areas · Knowledge Center · Offices
+- Hamburger menu appears below 900px — animated into an ✕ when open
+- Gains a deeper shadow on scroll via scrollY listener
+
+### 🌟 Hero (Hero.jsx)
+- Full-viewport dark navy section with diagonal line texture
+- 4-slide auto-rotating text (every 5 seconds) with fade/slide animation
+- Dot indicators for manual navigation
+- Two CTA buttons + animated scroll arrow
+
+### 🏛️ About (About.jsx)
+- Two-column layout: firm description + 4 animated stat cards (25+ years, 500+ cases, etc.)
+- Gold border accent on stat cards
+
+### ⚖️ Practice Areas (PracticeAreas.jsx)
+- 12 practice area cards in a 4-column responsive grid
+- Cards lift and show gold bottom border + "Learn more →" on hover
+- Collapses to 3 → 2 → 1 columns on smaller screens
+
+### 🦶 Footer (Footer.jsx)
+- 4-column grid: Brand + Quick Links + Practice Areas + Contact
+- Social icons (LinkedIn, X, Facebook)
+- Disclaimer strip with the Bar Council notice
+- Copyright bar with Privacy Policy / Terms of Use / Cookie Policy links
+
+### 🎨 Global Theme (index.css)
+- Navy (#0d1b2a) + Gold (#b8963e) color palette via CSS custom properties
+- Georgia serif for headings, system-ui for body text
+- Utility classes: .container, .section, .section-title

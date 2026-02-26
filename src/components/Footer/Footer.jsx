@@ -10,18 +10,14 @@ const QUICK_LINKS = [
 ]
 
 const PRACTICE_LINKS = [
-  'Corporate & Commercial',
   'Litigation & Arbitration',
   'Real Estate',
-  'Employment Law',
-  'Intellectual Property',
-  'Banking & Finance',
 ]
 
 const SOCIAL = [
-  { label: 'LinkedIn',  href: '#', icon: 'in' },
-  { label: 'Twitter',   href: '#', icon: '𝕏' },
-  { label: 'Facebook',  href: '#', icon: 'f' },
+  { label: 'LinkedIn',  href: 'https://www.linkedin.com/', icon: 'in' },
+  { label: 'Twitter',   href: 'https://x.com/', icon: '𝕏' },
+  { label: 'Facebook',  href: 'https://www.facebook.com/', icon: 'f' },
 ]
 
 function Footer() {
@@ -55,6 +51,8 @@ function Footer() {
                   href={s.href}
                   className="footer__social-link"
                   aria-label={s.label}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   {s.icon}
                 </a>
@@ -136,11 +134,19 @@ function Footer() {
         <div className="container footer__bottom-inner">
           <p>© {year} Absar Law Company. All rights reserved.</p>
           <div className="footer__bottom-links">
-            <a href="#" className="footer__link">Privacy Policy</a>
+            <button
+              className="footer__link footer__link--btn"
+              onClick={() => handleNav('/privacy-policy')}
+            >
+              Privacy Policy
+            </button>
             <span aria-hidden="true">|</span>
-            <a href="#" className="footer__link">Terms of Use</a>
-            <span aria-hidden="true">|</span>
-            <a href="#" className="footer__link">Cookie Policy</a>
+            <button
+              className="footer__link footer__link--btn"
+              onClick={() => handleNav('/terms-of-use')}
+            >
+              Terms of Use
+            </button>
           </div>
         </div>
       </div>

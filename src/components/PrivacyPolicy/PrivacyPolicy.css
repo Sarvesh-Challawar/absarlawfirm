@@ -1,0 +1,156 @@
+/* ───────────────────────────────────────────
+   PrivacyPolicy.css
+─────────────────────────────────────────── */
+
+.policy {
+  background-color: var(--color-offwhite);
+  min-height: calc(100vh - var(--navbar-height));
+}
+
+.policy__eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 0.5rem;
+}
+
+.policy__meta {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-top: -1rem;
+  margin-bottom: 3rem;
+}
+
+/* ── Body ────────────────────────────────── */
+.policy__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  max-width: 820px;
+}
+
+.policy__section {
+  border-left: 4px solid var(--color-gold);
+  padding-left: 1.5rem;
+}
+
+.policy__section-title {
+  font-family: var(--font-primary);
+  font-size: 1.2rem;
+  color: var(--color-navy);
+  margin-bottom: 0.75rem;
+}
+
+.policy__text {
+  font-family: var(--font-sans);
+  font-size: 0.97rem;
+  color: var(--color-text);
+  line-height: 1.8;
+  margin-bottom: 0.75rem;
+}
+
+/* ── List ────────────────────────────────── */
+.policy__list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.policy__list li {
+  font-family: var(--font-sans);
+  font-size: 0.97rem;
+  color: var(--color-text);
+  line-height: 1.7;
+  padding-left: 1.1rem;
+  position: relative;
+}
+
+.policy__list li::before {
+  content: '–';
+  position: absolute;
+  left: 0;
+  color: var(--color-gold);
+  font-weight: 700;
+}
+
+/* ── Contact block ───────────────────────── */
+.policy__contact {
+  font-style: normal;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+
+.policy__contact p {
+  font-family: var(--font-sans);
+  font-size: 0.97rem;
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+.policy__link {
+  color: var(--color-gold);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.policy__link:hover {
+  color: var(--color-gold-light);
+  text-decoration: underline;
+}
+
+/* ── Back button ─────────────────────────── */
+.policy__back {
+  margin-top: 3.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.policy__back-btn {
+  background: none;
+  border: 2px solid var(--color-gold);
+  color: var(--color-gold);
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 0.6rem 1.4rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.policy__back-btn:hover,
+.policy__back-btn:focus-visible {
+  background-color: var(--color-gold);
+  color: var(--color-white);
+}
+
+/* ── Responsive ──────────────────────────── */
+@media (max-width: 600px) {
+  .policy__body {
+    gap: 2rem;
+  }
+
+  .policy__section {
+    padding-left: 1rem;
+  }
+
+  .policy__section-title {
+    font-size: 1.05rem;
+  }
+
+  .policy__text,
+  .policy__list li,
+  .policy__contact p {
+    font-size: 0.93rem;
+  }
+}

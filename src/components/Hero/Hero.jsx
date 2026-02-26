@@ -43,11 +43,36 @@ function Hero() {
     }, 300)
   }
 
+  function goPrev() {
+    goTo((current - 1 + SLIDES.length) % SLIDES.length)
+  }
+
+  function goNext() {
+    goTo((current + 1) % SLIDES.length)
+  }
+
   const slide = SLIDES[current]
 
   return (
     <section className="hero" aria-label="Hero">
       <div className="hero__overlay" />
+
+      {/* Prev / Next arrows */}
+      <button
+        className="hero__arrow hero__arrow--prev"
+        onClick={goPrev}
+        aria-label="Previous slide"
+      >
+        <span className="hero__arrow-icon" aria-hidden="true" />
+      </button>
+      <button
+        className="hero__arrow hero__arrow--next"
+        onClick={goNext}
+        aria-label="Next slide"
+      >
+        <span className="hero__arrow-icon" aria-hidden="true" />
+      </button>
+
       <div className="hero__content container">
         <div className={`hero__text${animating ? ' hero__text--visible' : ''}`}>
           <p className="hero__eyebrow">Absar Law Company</p>

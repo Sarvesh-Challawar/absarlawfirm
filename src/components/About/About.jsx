@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import './About.css'
 
 const STATS = [
-  { value: '25+', label: 'Years of Practice' },
-  { value: '500+', label: 'Cases Handled' },
-  { value: '12', label: 'Practice Areas' },
+  { value: '5+', label: 'Years of Practice' },
+  { value: '50+', label: 'Cases Handled' },
+  { value: '4', label: 'Practice Areas' },
   { value: '98%', label: 'Client Satisfaction' },
 ]
 
@@ -22,7 +22,7 @@ function About() {
 
           {/* Text */}
           <div className="about__content">
-            <p className="about__eyebrow">Who We Are</p>
+            <br></br>
             <h2 className="section-title">About Absar Law Company</h2>
             <p className="about__body">
               Absars Law Company is a premier full-service law firm committed to delivering

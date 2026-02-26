@@ -1,0 +1,155 @@
+.offices {
+  background: var(--color-white);
+}
+
+.offices__eyebrow {
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+/* ─── Grid ──────────────────────────────────────────────────── */
+.offices__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+/* ─── Card ──────────────────────────────────────────────────── */
+.offices__card {
+  background: var(--color-offwhite);
+  border: 1px solid var(--color-border);
+  border-left: 4px solid var(--color-gold);
+  padding: 2rem 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: box-shadow 0.25s, transform 0.25s;
+}
+
+.offices__card:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+  transform: translateY(-3px);
+}
+
+/* ─── Card header ───────────────────────────────────────────── */
+.offices__card-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.offices__city {
+  font-family: var(--font-primary);
+  font-size: 1.35rem;
+  color: var(--color-navy);
+  font-weight: 700;
+}
+
+.offices__type {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-gold);
+  background: rgba(184, 150, 62, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 2px;
+}
+
+/* ─── Address ───────────────────────────────────────────────── */
+.offices__address {
+  font-style: normal;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+/* ─── Details list ──────────────────────────────────────────── */
+.offices__details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  border-top: 1px solid var(--color-border);
+  padding-top: 1.25rem;
+}
+
+.offices__details li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+}
+
+.offices__detail-label {
+  width: 1.1rem;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+}
+
+.offices__detail-link {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.offices__detail-link:hover {
+  color: var(--color-gold);
+}
+
+.offices__hours {
+  color: var(--color-text-muted);
+}
+
+/* ─── Contact strip ─────────────────────────────────────────── */
+.offices__contact-strip {
+  margin-top: 3.5rem;
+  background: var(--color-navy);
+  padding: 2rem;
+  text-align: center;
+}
+
+.offices__contact-strip-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+.offices__contact-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.offices__contact-link {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-gold-light);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.offices__contact-link:hover {
+  color: var(--color-white);
+}
+
+.offices__contact-divider {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* ─── Responsive ────────────────────────────────────────────── */
+@media (max-width: 760px) {
+  .offices__grid {
+    grid-template-columns: 1fr;
+  }
+}

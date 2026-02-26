@@ -1,0 +1,126 @@
+.people {
+  background: var(--color-white);
+}
+
+.people__eyebrow {
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+/* ─── Grid ──────────────────────────────────────────────────── */
+.people__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+/* ─── Card ──────────────────────────────────────────────────── */
+.people__card {
+  background: var(--color-offwhite);
+  border: 1px solid var(--color-border);
+  border-bottom: 3px solid transparent;
+  padding: 2rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+}
+
+.people__card:hover {
+  border-bottom-color: var(--color-gold);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+  transform: translateY(-3px);
+}
+
+/* ─── Avatar ────────────────────────────────────────────────── */
+.people__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--color-navy);
+  color: var(--color-gold);
+  font-family: var(--font-primary);
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+/* ─── Info ──────────────────────────────────────────────────── */
+.people__name {
+  font-family: var(--font-primary);
+  font-size: 1.1rem;
+  color: var(--color-navy);
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.people__role {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.25rem;
+}
+
+.people__areas {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin-bottom: 0.75rem;
+  border-left: 3px solid var(--color-gold);
+  padding-left: 0.6rem;
+}
+
+.people__bio {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.75;
+}
+
+/* ─── CTA row ───────────────────────────────────────────────── */
+.people__cta-row {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.people__cta {
+  display: inline-block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  letter-spacing: 0.04em;
+  color: var(--color-navy);
+  background: none;
+  border: none;
+  border-bottom: 2px solid var(--color-gold);
+  padding-bottom: 2px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.people__cta:hover {
+  color: var(--color-gold);
+  border-color: var(--color-gold-light);
+}
+
+/* ─── Responsive ────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .people__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .people__grid {
+    grid-template-columns: 1fr;
+  }
+}

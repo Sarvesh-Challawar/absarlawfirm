@@ -17,15 +17,18 @@ const CATEGORIES = [
 ]
 
 const EMPTY_FORM = {
+  articleType: 'internal',  // 'internal' | 'external'
   category: CATEGORIES[0],
   title: '',
+  customDate: '',
+  url: '',
   excerpt: '',
   body: '',
   author: '',
 }
 
 function KnowledgeCenter() {
-  const { articles, addArticle, deleteArticle, resetToSeed } = useArticles()
+  const { articles, loading, error, isSupabase, addArticle, deleteArticle, resetToSeed } = useArticles()
 
   // article reader modal
   const [selectedArticle, setSelectedArticle] = useState(null)
@@ -39,6 +42,7 @@ function KnowledgeCenter() {
   const [formError, setFormError]             = useState('')
   const [successMsg, setSuccessMsg]           = useState('')
   const [confirmReset, setConfirmReset]       = useState(false)
+  const [submitting, setSubmitting]           = useState(false)
 
   // scroll to top on mount
   useEffect(() => {
@@ -100,24 +104,35 @@ function KnowledgeCenter() {
     setSuccessMsg('')
   }
 
-  function handleAddArticle(e) {
+  async function handleAddArticle(e) {
     e.preventDefault()
-    if (!form.title.trim())   return setFormError('Title is required.')
-    if (!form.excerpt.trim()) return setFormError('Excerpt is required.')
-    if (!form.body.trim())    return setFormError('Article body is required.')
-    addArticle(form)
+    if (!form.title.trim()) return setFormError('Title is required.')
+    if (form.articleType === 'external') {
+      if (!form.url.trim()) return setFormError('URL is required for external articles.')
+      try { new URL(form.url.trim()) } catch { return setFormError('Please enter a valid URL (include https://).') }
+    } else {
+      if (!form.excerpt.trim()) return setFormError('Excerpt is required.')
+      if (!form.body.trim())    return setFormError('Article body is required.')
+    }
+    setSubmitting(true)
+    const { error: addError } = await addArticle(form)
+    setSubmitting(false)
+    if (addError) return setFormError(`Failed to publish: ${addError}`)
     setForm(EMPTY_FORM)
     setSuccessMsg('Article published successfully.')
     setFormError('')
   }
 
-  function handleDelete(id, title) {
-    if (window.confirm(`Delete "${title}"?`)) deleteArticle(id)
+  async function handleDelete(id, title) {
+    if (!window.confirm(`Delete "${title}"?`)) return
+    const { error: delError } = await deleteArticle(id)
+    if (delError) alert(`Failed to delete: ${delError}`)
   }
 
-  function handleReset() {
-    resetToSeed()
+  async function handleReset() {
+    const { error: resetError } = await resetToSeed()
     setConfirmReset(false)
+    if (resetError) return setSuccessMsg(`Reset failed: ${resetError}`)
     setSuccessMsg('Articles reset to default.')
   }
 
@@ -132,8 +147,14 @@ function KnowledgeCenter() {
           practice areas — helping clients stay informed and ahead of regulatory change.
         </p>
 
-        {/* admin trigger buttons */}
+        {/* status badge + admin trigger buttons */}
         <div className="knowledge__admin-bar">
+          <span
+            className={`knowledge__status-badge${isSupabase ? ' knowledge__status-badge--live' : ''}`}
+            title={isSupabase ? 'Articles are stored in Supabase (cross-device)' : 'Supabase not configured — showing seed articles'}
+          >
+            {isSupabase ? '● Live (Supabase)' : '○ Local (configure Supabase)'}
+          </span>
           <button
             className="knowledge__admin-btn"
             onClick={() => handleAdminOpen('add')}
@@ -150,26 +171,50 @@ function KnowledgeCenter() {
           </button>
         </div>
 
+        {/* loading / error states */}
+        {loading && (
+          <p className="knowledge__loading" aria-live="polite">Loading articles…</p>
+        )}
+        {!loading && error && (
+          <p className="knowledge__error" role="alert">
+            Could not load articles from Supabase — showing default content.
+          </p>
+        )}
+
         {/* article grid */}
-        <div className="knowledge__grid">
-          {articles.map(article => (
-            <article key={article.id} className="knowledge__card">
-              <div className="knowledge__card-header">
-                <span className="knowledge__category">{article.category}</span>
-                <span className="knowledge__date">{article.date}</span>
-              </div>
-              <h3 className="knowledge__title">{article.title}</h3>
-              <p className="knowledge__excerpt">{article.excerpt}</p>
-              <button
-                className="knowledge__read-more"
-                onClick={() => setSelectedArticle(article)}
-                aria-label={`Read full article: ${article.title}`}
-              >
-                Read article →
-              </button>
-            </article>
-          ))}
-        </div>
+        {!loading && (
+          <div className="knowledge__grid">
+            {articles.map(article => (
+              <article key={article.id} className="knowledge__card">
+                <div className="knowledge__card-header">
+                  <span className="knowledge__category">{article.category}</span>
+                  <span className="knowledge__date">{article.date}</span>
+                </div>
+                <h3 className="knowledge__title">{article.title}</h3>
+                <p className="knowledge__excerpt">{article.excerpt}</p>
+                {article.url ? (
+                  <a
+                    className="knowledge__read-more"
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Read external article: ${article.title} (opens in new tab)`}
+                  >
+                    Read article ↗
+                  </a>
+                ) : (
+                  <button
+                    className="knowledge__read-more"
+                    onClick={() => setSelectedArticle(article)}
+                    aria-label={`Read full article: ${article.title}`}
+                  >
+                    Read article →
+                  </button>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── article reader modal ────────────────────────────── */}
@@ -258,6 +303,24 @@ function KnowledgeCenter() {
               /* ── add article form ── */
               <form className="knowledge__article-form" onSubmit={handleAddArticle}>
 
+                {/* article type toggle */}
+                <div className="knowledge__type-toggle" role="group" aria-label="Article type">
+                  <button
+                    type="button"
+                    className={`knowledge__type-btn${form.articleType === 'internal' ? ' knowledge__type-btn--active' : ''}`}
+                    onClick={() => setForm(prev => ({ ...prev, articleType: 'internal', url: '' }))}
+                  >
+                    Internal Article
+                  </button>
+                  <button
+                    type="button"
+                    className={`knowledge__type-btn${form.articleType === 'external' ? ' knowledge__type-btn--active' : ''}`}
+                    onClick={() => setForm(prev => ({ ...prev, articleType: 'external', excerpt: '', body: '' }))}
+                  >
+                    External Link
+                  </button>
+                </div>
+
                 <label className="knowledge__label">
                   Category
                   <select
@@ -283,40 +346,79 @@ function KnowledgeCenter() {
                 </label>
 
                 <label className="knowledge__label">
-                  Author
+                  Date <span className="knowledge__hint">(optional — leave blank for today)</span>
                   <input
                     type="text"
-                    name="author"
+                    name="customDate"
                     className="knowledge__input"
-                    value={form.author}
+                    value={form.customDate}
                     onChange={handleFormChange}
-                    placeholder="e.g. Absar Law Editorial Team"
+                    placeholder="e.g. 15 January 2025"
                   />
                 </label>
 
-                <label className="knowledge__label">
-                  Excerpt <span className="knowledge__required">*</span>
-                  <textarea
-                    name="excerpt"
-                    className="knowledge__input knowledge__textarea"
-                    value={form.excerpt}
-                    onChange={handleFormChange}
-                    placeholder="Short summary shown on the card (2–3 sentences)"
-                    rows={3}
-                  />
-                </label>
-
-                <label className="knowledge__label">
-                  Full Article Body <span className="knowledge__required">*</span>
-                  <textarea
-                    name="body"
-                    className="knowledge__input knowledge__textarea"
-                    value={form.body}
-                    onChange={handleFormChange}
-                    placeholder="Full article content. Use blank lines to separate paragraphs."
-                    rows={8}
-                  />
-                </label>
+                {form.articleType === 'external' ? (
+                  <>
+                    <label className="knowledge__label">
+                      External URL <span className="knowledge__required">*</span>
+                      <input
+                        type="url"
+                        name="url"
+                        className="knowledge__input"
+                        value={form.url}
+                        onChange={handleFormChange}
+                        placeholder="https://example.com/article"
+                      />
+                    </label>
+                    <label className="knowledge__label">
+                      Excerpt / Summary <span className="knowledge__hint">(shown on card)</span>
+                      <textarea
+                        name="excerpt"
+                        className="knowledge__input knowledge__textarea"
+                        value={form.excerpt}
+                        onChange={handleFormChange}
+                        placeholder="Short description of the linked article"
+                        rows={3}
+                      />
+                    </label>
+                  </>
+                ) : (
+                  <>
+                    <label className="knowledge__label">
+                      Author
+                      <input
+                        type="text"
+                        name="author"
+                        className="knowledge__input"
+                        value={form.author}
+                        onChange={handleFormChange}
+                        placeholder="e.g. Absar Law Editorial Team"
+                      />
+                    </label>
+                    <label className="knowledge__label">
+                      Excerpt <span className="knowledge__required">*</span>
+                      <textarea
+                        name="excerpt"
+                        className="knowledge__input knowledge__textarea"
+                        value={form.excerpt}
+                        onChange={handleFormChange}
+                        placeholder="Short summary shown on the card (2–3 sentences)"
+                        rows={3}
+                      />
+                    </label>
+                    <label className="knowledge__label">
+                      Full Article Body <span className="knowledge__required">*</span>
+                      <textarea
+                        name="body"
+                        className="knowledge__input knowledge__textarea"
+                        value={form.body}
+                        onChange={handleFormChange}
+                        placeholder="Full article content. Use blank lines to separate paragraphs."
+                        rows={8}
+                      />
+                    </label>
+                  </>
+                )}
 
                 {formError && (
                   <p className="knowledge__form-error" role="alert">{formError}</p>
@@ -325,8 +427,8 @@ function KnowledgeCenter() {
                   <p className="knowledge__form-success" role="status">{successMsg}</p>
                 )}
 
-                <button type="submit" className="knowledge__submit-btn">
-                  Publish Article
+                <button type="submit" className="knowledge__submit-btn" disabled={submitting}>
+                  {submitting ? 'Publishing…' : 'Publish Article'}
                 </button>
               </form>
 

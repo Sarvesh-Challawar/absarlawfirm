@@ -1,4 +1,5 @@
 import { msalInstance, graphScopes } from './msalConfig'
+import { supabase } from './supabase'
 
 const FOLDER = import.meta.env.VITE_ONEDRIVE_FOLDER || 'lawfirmarticles'
 const GRAPH   = 'https://graph.microsoft.com/v1.0'
@@ -111,6 +112,8 @@ export async function listPDFs() {
 
 /**
  * Upload a PDF file to the OneDrive folder.
+ * Also creates an anonymous share link and saves metadata to Supabase
+ * so public users can list documents without signing in.
  * Returns the uploaded item object.
  */
 export async function uploadPDF(file) {
@@ -130,7 +133,28 @@ export async function uploadPDF(file) {
   )
 
   if (!res.ok) throw new Error('Upload failed')
-  return res.json()
+  const item = await res.json()
+
+  // Create a per-file anonymous view link so we can store it for public access
+  let shareUrl = null
+  try {
+    shareUrl = await getOrCreateShareLink(token, item.id)
+  } catch {
+    // Non-fatal: link creation failed, skip Supabase save
+  }
+
+  // Persist metadata to Supabase for unauthenticated public listing
+  if (supabase && shareUrl) {
+    const { error: sbError } = await supabase.from('kc_documents').insert({
+      onedrive_id : item.id,
+      name        : item.name,
+      size        : item.size ?? null,
+      share_url   : shareUrl,
+    })
+    if (sbError) console.warn('[Supabase] Failed to save document metadata:', sbError.message)
+  }
+
+  return item
 }
 
 /**
@@ -144,6 +168,7 @@ export async function getShareLink(itemId) {
 
 /**
  * Delete a file from the OneDrive folder.
+ * Also removes the corresponding record from Supabase.
  */
 export async function deletePDF(itemId) {
   const token = await getToken()
@@ -155,42 +180,44 @@ export async function deletePDF(itemId) {
 
   if (!res.ok && res.status !== 204) throw new Error('Delete failed')
   shareLinkCache.delete(itemId)
+
+  // Remove from Supabase so the public listing stays in sync
+  if (supabase) {
+    const { error: sbError } = await supabase
+      .from('kc_documents')
+      .delete()
+      .eq('onedrive_id', itemId)
+    if (sbError) console.warn('[Supabase] Failed to remove document metadata:', sbError.message)
+  }
 }
 
 /**
- * List all PDFs in the OneDrive folder publicly — no sign-in required.
+ * List all PDFs for public (unauthenticated) users.
  *
- * Requires VITE_ONEDRIVE_SHARE_URL to be set in .env.local.
- * The share URL must be an "Anyone with the link" (view) share on the folder.
+ * Reads from the `kc_documents` Supabase table which is populated
+ * whenever an admin uploads a file. The Microsoft Graph shares API
+ * requires authentication even for "Anyone with the link" folder shares,
+ * so Supabase acts as the public metadata store.
+ *
+ * Requires VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local.
+ * See SUPABASE_SETUP.md for table creation SQL.
  *
  * Returns: [{ id, name, size, viewUrl }]
  */
 export async function listPDFsPublic() {
-  const shareUrl = import.meta.env.VITE_ONEDRIVE_SHARE_URL
-  if (!shareUrl) return []
+  if (!supabase) return []
 
-  // Encode the share URL per Microsoft Graph sharing token spec
-  const encoded =
-    'u!' + btoa(shareUrl).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+  const { data, error } = await supabase
+    .from('kc_documents')
+    .select('onedrive_id, name, size, share_url')
+    .order('uploaded_at', { ascending: false })
 
-  const res = await fetch(
-    `${GRAPH}/shares/${encoded}/driveItem/children?$select=id,name,webUrl,size,file`,
-  )
+  if (error) throw new Error(error.message || 'Failed to load documents')
 
-  if (!res.ok) {
-    if (res.status === 404) return []
-    throw new Error('Failed to load documents from OneDrive')
-  }
-
-  const data = await res.json()
-  return (data.value || [])
-    .filter(f => f.file && f.name.toLowerCase().endsWith('.pdf'))
-    .map(f => ({
-      id     : f.id,
-      name   : f.name,
-      size   : f.size,
-      // @microsoft.graph.downloadUrl is a short-lived (~1 h) unauthenticated URL
-      // automatically included in file drive-item responses.
-      viewUrl: f['@microsoft.graph.downloadUrl'] || f.webUrl,
-    }))
+  return (data || []).map(doc => ({
+    id     : doc.onedrive_id,
+    name   : doc.name,
+    size   : doc.size,
+    viewUrl: doc.share_url,
+  }))
 }

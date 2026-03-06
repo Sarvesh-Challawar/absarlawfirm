@@ -1,4 +1,4 @@
-import { msalInstance, graphScopes } from './msalConfig'
+import { msalInstance, msalReady, graphScopes } from './msalConfig'
 import { supabase } from './supabase'
 
 const FOLDER = import.meta.env.VITE_ONEDRIVE_FOLDER || 'lawfirmarticles'
@@ -9,18 +9,19 @@ const shareLinkCache = new Map()
 
 // ── auth ──────────────────────────────────────────────────────────────────────
 
-let _initialized = false
-
+/**
+ * Returns a valid Graph access token.
+ * msalReady is guaranteed to have resolved before this is called
+ * (main.jsx awaits it before mounting the app), so no await happens
+ * before loginPopup — the browser popup blocker stays silent.
+ */
 async function getToken() {
-  if (!_initialized) {
-    await msalInstance.initialize()
-    _initialized = true
-  }
+  // msalReady is already resolved at this point; awaiting it is instant
+  await msalReady
 
   const accounts = msalInstance.getAllAccounts()
 
   if (!accounts.length) {
-    // First time — show login popup
     const result = await msalInstance.loginPopup({ scopes: graphScopes })
     return result.accessToken
   }
@@ -32,7 +33,6 @@ async function getToken() {
     })
     return result.accessToken
   } catch {
-    // Silent refresh failed — show popup
     const result = await msalInstance.acquireTokenPopup({
       scopes : graphScopes,
       account: accounts[0],

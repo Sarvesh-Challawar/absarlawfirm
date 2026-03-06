@@ -14,5 +14,14 @@ const msalConfig = {
 
 export const msalInstance = new PublicClientApplication(msalConfig)
 
+/**
+ * Promise that resolves when msalInstance is fully initialized.
+ * Awaited in main.jsx before the React app mounts so that by the time
+ * any user clicks a button, initialize() is already done.
+ * This prevents the popup blocker from firing because loginPopup()
+ * can then be called with no awaits breaking the user-activation chain.
+ */
+export const msalReady = msalInstance.initialize()
+
 /** Scopes needed to read/write OneDrive files */
 export const graphScopes = ['Files.ReadWrite', 'User.Read']

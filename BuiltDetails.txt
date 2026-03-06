@@ -37,3 +37,5 @@
 - Navy (#0d1b2a) + Gold (#b8963e) color palette via CSS custom properties
 - Georgia serif for headings, system-ui for body text
 - Utility classes: .container, .section, .section-title
+
+DONE

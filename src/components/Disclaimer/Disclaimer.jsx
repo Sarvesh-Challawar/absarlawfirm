@@ -1,18 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import './Disclaimer.css'
 
 function Disclaimer() {
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    const agreed = localStorage.getItem('absar_disclaimer_agreed')
-    if (!agreed) {
-      setVisible(true)
-    }
-  }, [])
+  const [visible, setVisible] = useState(true)
 
   function handleAgree() {
-    localStorage.setItem('absar_disclaimer_agreed', 'true')
     setVisible(false)
   }
 

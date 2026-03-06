@@ -39,3 +39,7 @@
 - Utility classes: .container, .section, .section-title
 
 DONE
+
+AppName: AbsarLawFirm
+Client Id: 97cccec9-bb1f-4286-9f4d-6eedcd7ae469
+Tenant Id: e80aea47-8cb1-4482-b3fa-9d8b0401e043

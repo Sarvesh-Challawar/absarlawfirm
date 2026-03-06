@@ -846,3 +846,18 @@
   flex-direction: column;
   gap: 1.25rem;
 }
+
+/* ── Upload panel (new admin upload view) ─ */
+.knowledge__upload-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-top: 0.25rem;
+}
+
+.knowledge__upload-hint {
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+}

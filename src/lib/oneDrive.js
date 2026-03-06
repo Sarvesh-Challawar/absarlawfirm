@@ -156,3 +156,41 @@ export async function deletePDF(itemId) {
   if (!res.ok && res.status !== 204) throw new Error('Delete failed')
   shareLinkCache.delete(itemId)
 }
+
+/**
+ * List all PDFs in the OneDrive folder publicly — no sign-in required.
+ *
+ * Requires VITE_ONEDRIVE_SHARE_URL to be set in .env.local.
+ * The share URL must be an "Anyone with the link" (view) share on the folder.
+ *
+ * Returns: [{ id, name, size, viewUrl }]
+ */
+export async function listPDFsPublic() {
+  const shareUrl = import.meta.env.VITE_ONEDRIVE_SHARE_URL
+  if (!shareUrl) return []
+
+  // Encode the share URL per Microsoft Graph sharing token spec
+  const encoded =
+    'u!' + btoa(shareUrl).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+
+  const res = await fetch(
+    `${GRAPH}/shares/${encoded}/driveItem/children?$select=id,name,webUrl,size,file`,
+  )
+
+  if (!res.ok) {
+    if (res.status === 404) return []
+    throw new Error('Failed to load documents from OneDrive')
+  }
+
+  const data = await res.json()
+  return (data.value || [])
+    .filter(f => f.file && f.name.toLowerCase().endsWith('.pdf'))
+    .map(f => ({
+      id     : f.id,
+      name   : f.name,
+      size   : f.size,
+      // @microsoft.graph.downloadUrl is a short-lived (~1 h) unauthenticated URL
+      // automatically included in file drive-item responses.
+      viewUrl: f['@microsoft.graph.downloadUrl'] || f.webUrl,
+    }))
+}

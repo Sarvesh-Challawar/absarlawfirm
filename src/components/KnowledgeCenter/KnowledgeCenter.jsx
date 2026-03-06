@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { listPDFsPublic, listPDFs, uploadPDF, deletePDF } from '../../lib/oneDrive'
+import { listPDFsPublic, listPDFs, uploadPDF, deletePDF, preAuth } from '../../lib/oneDrive'
 import './KnowledgeCenter.css'
 
 function formatBytes(bytes) {
@@ -23,6 +23,7 @@ function KnowledgeCenter() {
   const [pwInput, setPwInput]             = useState('')
   const [pwError, setPwError]             = useState(false)
   const [authenticated, setAuthenticated] = useState(false)
+  const [signingIn, setSigningIn]         = useState(false)
 
   // ── upload state ─────────────────────────────────────────────────────────
   const [pdfUploading, setPdfUploading]   = useState(false)
@@ -78,6 +79,7 @@ function KnowledgeCenter() {
     setPwInput('')
     setPwError(false)
     setAuthenticated(false)
+    setSigningIn(false)
     setUploadError(null)
     setUploadSuccess('')
     setDeleteSuccess('')
@@ -88,6 +90,7 @@ function KnowledgeCenter() {
   function handleAdminClose() {
     setAdminMode(null)
     setAuthenticated(false)
+    setSigningIn(false)
     setPwInput('')
     // Refresh the public listing in case files changed
     fetchPublicPDFs()
@@ -96,6 +99,18 @@ function KnowledgeCenter() {
   async function handlePasswordSubmit(e) {
     e.preventDefault()
     if (pwInput === ADMIN_PASSWORD) {
+      // Trigger MSAL sign-in NOW while we're inside a button-click handler
+      // (a trusted user gesture). If we wait until file-input onChange the
+      // browser popup blocker will kill the window.
+      setSigningIn(true)
+      try {
+        await preAuth()
+      } catch (err) {
+        setUploadError('Microsoft sign-in failed. Please try again.')
+        setSigningIn(false)
+        return
+      }
+      setSigningIn(false)
       setAuthenticated(true)
       setPwError(false)
       if (adminMode === 'manage') fetchManagePDFs()
@@ -292,13 +307,17 @@ function KnowledgeCenter() {
                   onChange={e => { setPwInput(e.target.value); setPwError(false) }}
                   placeholder="Password"
                   autoFocus
+                  disabled={signingIn}
                   aria-label="Admin password"
                 />
                 {pwError && (
                   <p className="knowledge__form-error" role="alert">Incorrect password.</p>
                 )}
-                <button type="submit" className="knowledge__submit-btn">
-                  Continue
+                {uploadError && (
+                  <p className="knowledge__form-error" role="alert">{uploadError}</p>
+                )}
+                <button type="submit" className="knowledge__submit-btn" disabled={signingIn}>
+                  {signingIn ? 'Signing in to Microsoft…' : 'Continue'}
                 </button>
               </form>
 

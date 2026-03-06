@@ -41,6 +41,15 @@ async function getToken() {
   }
 }
 
+/**
+ * Pre-authenticate the user with OneDrive.
+ * Call this directly from a button-click handler so the browser allows the
+ * MSAL login popup (file-input onChange is not a trusted user gesture).
+ */
+export async function preAuth() {
+  await getToken()
+}
+
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 async function ensureFolder(token) {

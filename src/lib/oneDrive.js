@@ -1,30 +1,21 @@
-import { msalInstance, msalReady, graphScopes } from './msalConfig'
+import { msalInstance, msalReady, graphScopes, loginRequest } from './msalConfig'
 import { supabase } from './supabase'
 
-const FOLDER = import.meta.env.VITE_ONEDRIVE_FOLDER || 'lawfirmarticles'
-const GRAPH   = 'https://graph.microsoft.com/v1.0'
-
-// In-memory cache: itemId → anonymous share webUrl
-const shareLinkCache = new Map()
+const FOLDER     = import.meta.env.VITE_ONEDRIVE_FOLDER || 'lawfirmarticles'
+const GRAPH      = 'https://graph.microsoft.com/v1.0'
+const CHUNK_SIZE = 4 * 1024 * 1024   // 4 MB — Graph API chunk limit
 
 // ── auth ──────────────────────────────────────────────────────────────────────
 
 /**
- * Returns a valid Graph access token.
- * msalReady is guaranteed to have resolved before this is called
- * (main.jsx awaits it before mounting the app), so no await happens
- * before loginPopup — the browser popup blocker stays silent.
+ * Returns a valid Graph access token using silent acquisition only.
+ * The user must already be signed in (preAuth completed a redirect flow).
  */
 async function getToken() {
-  // msalReady is already resolved at this point; awaiting it is instant
   await msalReady
 
   const accounts = msalInstance.getAllAccounts()
-
-  if (!accounts.length) {
-    const result = await msalInstance.loginPopup({ scopes: graphScopes })
-    return result.accessToken
-  }
+  if (!accounts.length) throw new Error('Not signed in to Microsoft.')
 
   try {
     const result = await msalInstance.acquireTokenSilent({
@@ -33,21 +24,46 @@ async function getToken() {
     })
     return result.accessToken
   } catch {
-    const result = await msalInstance.acquireTokenPopup({
-      scopes : graphScopes,
-      account: accounts[0],
-    })
-    return result.accessToken
+    // Silent refresh failed — redirect to re-authenticate
+    sessionStorage.setItem('msal_return_path', '/knowledge-center')
+    await msalInstance.acquireTokenRedirect({ scopes: graphScopes, account: accounts[0] })
+    throw new Error('Redirecting for re-authentication')
   }
 }
 
 /**
- * Pre-authenticate the user with OneDrive.
- * Call this directly from a button-click handler so the browser allows the
- * MSAL login popup (file-input onChange is not a trusted user gesture).
+ * Pre-authenticate the user with Microsoft via redirect flow.
+ *
+ * If the user is already signed in (token cached), acquires silently and
+ * returns true — the caller can proceed immediately.
+ *
+ * If sign-in is required, saves adminMode + password-ok flags to
+ * sessionStorage and redirects to Microsoft login. The page will navigate
+ * away; on return, main.jsx calls handleRedirectPromise() and restores the
+ * hash route so KnowledgeCenter can auto-open the admin panel.
+ *
+ * @param {string} adminMode  'upload' | 'manage'
+ * @returns {Promise<boolean>} true if already authenticated, never resolves if redirecting
  */
-export async function preAuth() {
-  await getToken()
+export async function preAuth(adminMode) {
+  await msalReady
+
+  const accounts = msalInstance.getAllAccounts()
+  if (accounts.length) {
+    try {
+      await msalInstance.acquireTokenSilent({ scopes: graphScopes, account: accounts[0] })
+      return true  // already authenticated, caller can proceed
+    } catch {
+      // token expired — fall through to redirect
+    }
+  }
+
+  // Persist intent so KnowledgeCenter can restore state after redirect
+  sessionStorage.setItem('msal_admin_intent', adminMode)
+  sessionStorage.setItem('msal_pw_ok', 'true')
+  sessionStorage.setItem('msal_return_path', '/knowledge-center')
+  await msalInstance.loginRedirect(loginRequest)
+  // execution stops here — browser navigates to Microsoft login
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -60,7 +76,7 @@ async function ensureFolder(token) {
   if (check.ok) return
 
   // Folder doesn't exist — create it
-  await fetch(`${GRAPH}/me/drive/root/children`, {
+  const create = await fetch(`${GRAPH}/me/drive/root/children`, {
     method : 'POST',
     headers: {
       Authorization : `Bearer ${token}`,
@@ -72,11 +88,21 @@ async function ensureFolder(token) {
       '@microsoft.graph.conflictBehavior': 'fail',
     }),
   })
+
+  // 409 Conflict = folder already exists (race condition) — safe to ignore
+  if (!create.ok && create.status !== 409) {
+    const detail = await create.text().catch(() => '')
+    throw new Error(`Failed to create OneDrive folder (${create.status})${detail ? ': ' + detail : ''}`)
+  }
 }
+
+// In-memory cache: itemId → share webUrl
+const shareLinkCache = new Map()
 
 async function getOrCreateShareLink(token, itemId) {
   if (shareLinkCache.has(itemId)) return shareLinkCache.get(itemId)
 
+  // View link — anonymous, opens in browser; SharePoint blocks iframe embedding
   const res = await fetch(`${GRAPH}/me/drive/items/${itemId}/createLink`, {
     method : 'POST',
     headers: {
@@ -86,12 +112,18 @@ async function getOrCreateShareLink(token, itemId) {
     body: JSON.stringify({ type: 'view', scope: 'anonymous' }),
   })
 
-  if (!res.ok) throw new Error('Could not create share link')
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '')
+    throw new Error(
+      `Could not create share link (${res.status}). ` +
+      `Ensure SharePoint sharing is set to "Anyone" in the admin centre. ` +
+      `Details: ${detail}`
+    )
+  }
 
-  const data   = await res.json()
-  const webUrl = data.link.webUrl
-  shareLinkCache.set(itemId, webUrl)
-  return webUrl
+  const url = (await res.json()).link.webUrl
+  shareLinkCache.set(itemId, url)
+  return url
 }
 
 // ── public API ────────────────────────────────────────────────────────────────
@@ -121,45 +153,102 @@ export async function listPDFs() {
 
 /**
  * Upload a PDF file to the OneDrive folder.
- * Also creates an anonymous share link and saves metadata to Supabase
- * so public users can list documents without signing in.
+ * Uses a simple PUT for files ≤ 4 MB and a resumable upload session for
+ * larger files (the Graph API /content PUT endpoint rejects files > 4 MB).
  * Returns the uploaded item object.
  */
 export async function uploadPDF(file) {
   const token = await getToken()
   await ensureFolder(token)
 
-  const res = await fetch(
-    `${GRAPH}/me/drive/root:/${FOLDER}/${encodeURIComponent(file.name)}:/content`,
-    {
-      method : 'PUT',
-      headers: {
-        Authorization : `Bearer ${token}`,
-        'Content-Type': 'application/octet-stream',
-      },
-      body: file,
+  const encodedName = encodeURIComponent(file.name)
+  let item
+
+  if (file.size <= CHUNK_SIZE) {
+    // ── simple upload for files ≤ 4 MB ─────────────────────────────────────
+    const res = await fetch(
+      `${GRAPH}/me/drive/root:/${FOLDER}/${encodedName}:/content`,
+      {
+        method : 'PUT',
+        headers: {
+          Authorization : `Bearer ${token}`,
+          'Content-Type': 'application/pdf',
+        },
+        body: file,
+      }
+    )
+
+    if (!res.ok) {
+      const detail = await res.text().catch(() => '')
+      throw new Error(`Upload failed (${res.status})${detail ? ': ' + detail : ''}`)
     }
-  )
+    item = await res.json()
 
-  if (!res.ok) throw new Error('Upload failed')
-  const item = await res.json()
+  } else {
+    // ── resumable upload session for files > 4 MB ───────────────────────────
+    const sessionRes = await fetch(
+      `${GRAPH}/me/drive/root:/${FOLDER}/${encodedName}:/createUploadSession`,
+      {
+        method : 'POST',
+        headers: {
+          Authorization : `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          item: {
+            '@microsoft.graph.conflictBehavior': 'replace',
+            name: file.name,
+          },
+        }),
+      }
+    )
 
-  // Create a per-file anonymous view link so we can store it for public access
-  let shareUrl = null
-  try {
-    shareUrl = await getOrCreateShareLink(token, item.id)
-  } catch {
-    // Non-fatal: link creation failed, skip Supabase save
+    if (!sessionRes.ok) {
+      const detail = await sessionRes.text().catch(() => '')
+      throw new Error(`Failed to create upload session (${sessionRes.status})${detail ? ': ' + detail : ''}`)
+    }
+
+    const { uploadUrl } = await sessionRes.json()
+    const fileSize = file.size
+    let start = 0
+
+    while (start < fileSize) {
+      const end   = Math.min(start + CHUNK_SIZE, fileSize)
+      const chunk = file.slice(start, end)
+
+      const chunkRes = await fetch(uploadUrl, {
+        method : 'PUT',
+        headers: {
+          'Content-Range' : `bytes ${start}-${end - 1}/${fileSize}`,
+          'Content-Length': String(end - start),
+        },
+        body: chunk,
+      })
+
+      if (chunkRes.status === 200 || chunkRes.status === 201) {
+        // Final chunk — Graph returns the completed item
+        item = await chunkRes.json()
+      } else if (chunkRes.status === 202) {
+        // Intermediate chunk accepted, continue
+      } else {
+        const detail = await chunkRes.text().catch(() => '')
+        throw new Error(`Upload failed at byte ${start} (${chunkRes.status})${detail ? ': ' + detail : ''}`)
+      }
+
+      start = end
+    }
   }
 
-  // Persist metadata to Supabase for unauthenticated public listing
-  if (supabase && shareUrl) {
-    const { error: sbError } = await supabase.from('kc_documents').insert({
-      onedrive_id : item.id,
-      name        : item.name,
-      size        : item.size ?? null,
-      share_url   : shareUrl,
-    })
+  // Create anonymous share link — throws if SharePoint sharing is not set to "Anyone"
+  const shareUrl = await getOrCreateShareLink(token, item.id)
+
+  if (supabase) {
+    const { error: sbError } = await supabase.from('kc_documents').upsert({
+      onedrive_id: item.id,
+      name       : item.name,
+      size       : item.size ?? null,
+      share_url  : shareUrl,
+    }, { onConflict: 'onedrive_id' })
     if (sbError) console.warn('[Supabase] Failed to save document metadata:', sbError.message)
   }
 
@@ -167,17 +256,7 @@ export async function uploadPDF(file) {
 }
 
 /**
- * Get the anonymous share link (embed-safe) for a file.
- * Cached per session so we don't create duplicate links.
- */
-export async function getShareLink(itemId) {
-  const token = await getToken()
-  return getOrCreateShareLink(token, itemId)
-}
-
-/**
- * Delete a file from the OneDrive folder.
- * Also removes the corresponding record from Supabase.
+ * Delete a file from the OneDrive folder and remove its Supabase record.
  */
 export async function deletePDF(itemId) {
   const token = await getToken()
@@ -190,7 +269,6 @@ export async function deletePDF(itemId) {
   if (!res.ok && res.status !== 204) throw new Error('Delete failed')
   shareLinkCache.delete(itemId)
 
-  // Remove from Supabase so the public listing stays in sync
   if (supabase) {
     const { error: sbError } = await supabase
       .from('kc_documents')
@@ -203,18 +281,16 @@ export async function deletePDF(itemId) {
 /**
  * List all PDFs for public (unauthenticated) users.
  *
- * Reads from the `kc_documents` Supabase table which is populated
- * whenever an admin uploads a file. The Microsoft Graph shares API
- * requires authentication even for "Anyone with the link" folder shares,
- * so Supabase acts as the public metadata store.
- *
- * Requires VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env.local.
- * See SUPABASE_SETUP.md for table creation SQL.
+ * Reads from the Supabase `kc_documents` table which is populated
+ * whenever an admin uploads a file. No Microsoft authentication required.
  *
  * Returns: [{ id, name, size, viewUrl }]
  */
 export async function listPDFsPublic() {
-  if (!supabase) return []
+  if (!supabase) {
+    console.warn('[Supabase] Not configured — set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY')
+    return []
+  }
 
   const { data, error } = await supabase
     .from('kc_documents')

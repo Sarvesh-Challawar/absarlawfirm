@@ -1,10 +1,14 @@
 import { PublicClientApplication } from '@azure/msal-browser'
 
+// Build redirect URI from origin + BASE_URL, always with a trailing slash
+const base = (import.meta.env.BASE_URL || '/').replace(/\/?$/, '/')
+const redirectUri = window.location.origin + base
+
 const msalConfig = {
   auth: {
     clientId  : import.meta.env.VITE_AZURE_CLIENT_ID,
     authority : `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_TENANT_ID}`,
-    redirectUri: window.location.origin + (import.meta.env.BASE_URL || '/'),
+    redirectUri,
   },
   cache: {
     cacheLocation: 'sessionStorage',
@@ -25,3 +29,7 @@ export const msalReady = msalInstance.initialize()
 
 /** Scopes needed to read/write OneDrive files */
 export const graphScopes = ['Files.ReadWrite', 'User.Read']
+
+/** Extra login request options — forces the account picker so a cached
+ *  personal account doesn't shadow the business account. */
+export const loginRequest = { scopes: graphScopes, prompt: 'select_account' }

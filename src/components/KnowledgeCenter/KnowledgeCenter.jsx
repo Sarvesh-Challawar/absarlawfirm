@@ -16,7 +16,6 @@ function KnowledgeCenter() {
   const [pdfs, setPdfs]               = useState([])
   const [pdfsLoading, setPdfsLoading] = useState(true)
   const [pdfsError, setPdfsError]     = useState(null)
-  const [viewerPdf, setViewerPdf]     = useState(null)   // { name, viewUrl }
 
   // ── admin modal ──────────────────────────────────────────────────────────
   const [adminMode, setAdminMode]         = useState(null)   // null | 'upload' | 'manage'
@@ -50,24 +49,48 @@ function KnowledgeCenter() {
     }
   }, [])
 
+  // ── manage: fetch with auth ────────────────────────────────────────────────
+  const fetchManagePDFs = useCallback(async () => {
+    setManagePdfsLoading(true)
+    setManagePdfsError(null)
+    try {
+      const files = await listPDFs()
+      setManagePdfs(files)
+    } catch (e) {
+      setManagePdfsError(e.message || 'Failed to load documents.')
+    } finally {
+      setManagePdfsLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
     fetchPublicPDFs()
   }, [fetchPublicPDFs])
 
-  // lock body scroll when any modal / viewer is open
+  // Detect return from MSAL redirect and auto-open the admin panel
   useEffect(() => {
-    document.body.style.overflow = (adminMode !== null || viewerPdf !== null) ? 'hidden' : ''
+    const intent = sessionStorage.getItem('msal_admin_intent')
+    const pwOk   = sessionStorage.getItem('msal_pw_ok')
+    if (intent && pwOk) {
+      sessionStorage.removeItem('msal_admin_intent')
+      sessionStorage.removeItem('msal_pw_ok')
+      setAdminMode(intent)
+      setAuthenticated(true)
+      if (intent === 'manage') fetchManagePDFs()
+    }
+  }, [fetchManagePDFs])
+
+  // lock body scroll when admin modal is open
+  useEffect(() => {
+    document.body.style.overflow = adminMode !== null ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
-  }, [adminMode, viewerPdf])
+  }, [adminMode])
 
   // close on Escape
   useEffect(() => {
     function handleKey(e) {
-      if (e.key === 'Escape') {
-        setAdminMode(null)
-        setViewerPdf(null)
-      }
+      if (e.key === 'Escape') setAdminMode(null)
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
@@ -98,24 +121,25 @@ function KnowledgeCenter() {
 
   async function handlePasswordSubmit(e) {
     e.preventDefault()
-    if (pwInput === ADMIN_PASSWORD) {
-      // Trigger MSAL sign-in NOW while we're inside a button-click handler
-      // (a trusted user gesture). If we wait until file-input onChange the
-      // browser popup blocker will kill the window.
-      setSigningIn(true)
-      try {
-        await preAuth()
-      } catch (err) {
-        setUploadError('Microsoft sign-in failed. Please try again.')
-        setSigningIn(false)
-        return
-      }
-      setSigningIn(false)
-      setAuthenticated(true)
-      setPwError(false)
-      if (adminMode === 'manage') fetchManagePDFs()
-    } else {
+    if (pwInput !== ADMIN_PASSWORD) {
       setPwError(true)
+      return
+    }
+    setSigningIn(true)
+    try {
+      // preAuth returns true if already signed in, or redirects away to Microsoft
+      const alreadyAuthed = await preAuth(adminMode)
+      if (alreadyAuthed) {
+        // Token cached — no redirect needed, open panel immediately
+        setSigningIn(false)
+        setAuthenticated(true)
+        setPwError(false)
+        if (adminMode === 'manage') fetchManagePDFs()
+      }
+      // else: page is navigating to Microsoft — setSigningIn stays true as visual feedback
+    } catch (err) {
+      setUploadError(err.message || 'Microsoft sign-in failed. Please try again.')
+      setSigningIn(false)
     }
   }
 
@@ -141,20 +165,6 @@ function KnowledgeCenter() {
       e.target.value = ''
     }
   }
-
-  // ── manage: fetch with auth ────────────────────────────────────────────────
-  const fetchManagePDFs = useCallback(async () => {
-    setManagePdfsLoading(true)
-    setManagePdfsError(null)
-    try {
-      const files = await listPDFs()
-      setManagePdfs(files)
-    } catch (e) {
-      setManagePdfsError(e.message || 'Failed to load documents.')
-    } finally {
-      setManagePdfsLoading(false)
-    }
-  }, [])
 
   async function handleDeletePdf(id, name) {
     if (!window.confirm(`Delete "${name}"?`)) return
@@ -217,10 +227,12 @@ function KnowledgeCenter() {
         {!pdfsLoading && !pdfsError && pdfs.length > 0 && (
           <div className="knowledge__pdf-grid">
             {pdfs.map(pdf => (
-              <button
+              <a
                 key={pdf.id || pdf.name}
                 className="knowledge__pdf-card"
-                onClick={() => setViewerPdf({ name: pdf.name, viewUrl: pdf.viewUrl })}
+                href={pdf.viewUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 aria-label={`Open ${pdf.name}`}
               >
                 <span className="knowledge__pdf-icon" aria-hidden="true">📄</span>
@@ -230,46 +242,11 @@ function KnowledgeCenter() {
                 {pdf.size && (
                   <span className="knowledge__pdf-size">{formatBytes(pdf.size)}</span>
                 )}
-              </button>
+              </a>
             ))}
           </div>
         )}
       </div>
-
-      {/* ══════════════ PDF VIEWER OVERLAY ══════════════ */}
-      {viewerPdf && (
-        <div
-          className="knowledge__pdf-viewer-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label={`Viewing: ${viewerPdf.name}`}
-        >
-          <div className="knowledge__pdf-viewer-bar">
-            <span className="knowledge__pdf-viewer-title">{viewerPdf.name}</span>
-            <a
-              className="knowledge__pdf-open-link"
-              href={viewerPdf.viewUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              ↗ Open in new tab
-            </a>
-            <button
-              className="knowledge__pdf-viewer-close"
-              onClick={() => setViewerPdf(null)}
-              aria-label="Close PDF viewer"
-            >
-              ✕
-            </button>
-          </div>
-          <iframe
-            className="knowledge__pdf-iframe"
-            src={viewerPdf.viewUrl}
-            title={viewerPdf.name}
-            allowFullScreen
-          />
-        </div>
-      )}
 
       {/* ══════════════ ADMIN MODAL ══════════════ */}
       {adminMode !== null && (

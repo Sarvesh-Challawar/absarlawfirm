@@ -676,54 +676,97 @@
 /* ── PDF grid ────────────────────────────── */
 .knowledge__pdf-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
 }
 
 .knowledge__pdf-card {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 1.75rem 1.25rem 1.5rem;
   background: var(--color-white);
   border: 1px solid var(--color-border);
-  border-bottom: 3px solid transparent;
   border-radius: 4px;
+  overflow: hidden;
+  text-decoration: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   cursor: pointer;
-  transition: border-bottom-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
-  text-align: center;
 }
 
-.knowledge__pdf-card:hover:not(:disabled) {
-  border-bottom-color: var(--color-gold);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  transform: translateY(-3px);
+.knowledge__pdf-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 32px rgba(13, 27, 42, 0.12);
+  border-color: var(--color-gold);
 }
 
-.knowledge__pdf-card:disabled {
-  opacity: 0.7;
-  cursor: wait;
+.knowledge__pdf-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--color-navy);
+  padding: 0.85rem 1.1rem;
 }
 
-.knowledge__pdf-icon {
-  font-size: 2.2rem;
-  line-height: 1;
+.knowledge__pdf-badge {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  background: var(--color-gold);
+  border-radius: 3px;
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--color-navy);
+}
+
+.knowledge__pdf-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1rem 1.1rem 0.9rem;
+  gap: 0.5rem;
 }
 
 .knowledge__pdf-name {
-  font-family: var(--font-sans);
-  font-size: 0.88rem;
+  font-family: var(--font-primary);
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--color-navy);
-  line-height: 1.4;
+  line-height: 1.45;
   word-break: break-word;
+}
+
+.knowledge__pdf-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 0.35rem;
+  border-top: 1px solid var(--color-border);
 }
 
 .knowledge__pdf-size {
   font-family: var(--font-sans);
   font-size: 0.72rem;
   color: var(--color-text-muted);
+}
+
+.knowledge__pdf-open {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--color-gold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.knowledge__pdf-card:hover .knowledge__pdf-open {
+  opacity: 1;
 }
 
 /* ── PDF full-screen viewer ──────────────── */

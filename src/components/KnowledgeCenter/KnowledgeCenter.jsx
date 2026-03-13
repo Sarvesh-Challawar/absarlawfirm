@@ -235,13 +235,20 @@ function KnowledgeCenter() {
                 rel="noopener noreferrer"
                 aria-label={`Open ${pdf.name}`}
               >
-                <span className="knowledge__pdf-icon" aria-hidden="true">📄</span>
-                <span className="knowledge__pdf-name">
-                  {pdf.name.replace(/\.pdf$/i, '')}
-                </span>
-                {pdf.size && (
-                  <span className="knowledge__pdf-size">{formatBytes(pdf.size)}</span>
-                )}
+                <div className="knowledge__pdf-card-header">
+                  <span className="knowledge__pdf-badge">PDF</span>
+                </div>
+                <div className="knowledge__pdf-card-body">
+                  <span className="knowledge__pdf-name">
+                    {pdf.name.replace(/\.pdf$/i, '')}
+                  </span>
+                  <div className="knowledge__pdf-card-footer">
+                    <span className="knowledge__pdf-size">
+                      {pdf.size ? formatBytes(pdf.size) : 'Document'}
+                    </span>
+                    <span className="knowledge__pdf-open">View ↗</span>
+                  </div>
+                </div>
               </a>
             ))}
           </div>

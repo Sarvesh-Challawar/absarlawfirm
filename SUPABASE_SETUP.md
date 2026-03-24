@@ -81,7 +81,6 @@ Replace the placeholders with your real values:
 ```
 VITE_SUPABASE_URL=https://abcdefghij.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-DONE
 ```
 
 > ⚠️ `.env.local` is already listed in `.gitignore` — it will **never** be committed to git. Keep your keys safe.
